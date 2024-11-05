@@ -1,0 +1,160 @@
+create table if not exists User(
+                userId        bigint primary key auto_increment,
+                date_of_signup      datetime not null,
+                first_name          varchar(30) not null , 
+                last_name           varchar(30) , 
+                email               varchar(100) not null , 
+                github              varchar(60) , 
+                DOB                 date ,
+                description         varchar(1000) , 
+                profile_pic         varchar(1000) , 
+                password            varchar(30) not null , 
+                user_name           varchar(30) not null );
+
+create table if not exists company(
+		companyId           int primary key auto_increment,
+		title               varchar(30) not null,
+                number_of_member    tinyint not null , 
+                description         varchar(1000)  );
+
+create table if not exists project(
+		projectId           int primary key auto_increment,
+		userId              bigint not null,
+                title               varchar(30) not null, 
+                description         varchar(1000),
+                date_of_begin       datetime not null , 
+                date_of_end         datetime not null ,
+constraint FK_project_user_userId foreign key (userId) references User (userId) ON DELETE CASCADE 
+              
+);
+create table if not exists status(
+		statusId            tinyint primary key auto_increment,
+		title               varchar(30) not null,
+                from_date                date not null   );
+
+create table if not exists milestone(
+		milestoneId         bigint primary key auto_increment,
+		userId              bigint not null,
+                projectId           int not null ,
+                title               varchar(30) not null, 
+                date_of_begin       datetime not null , 
+                date_of_end         datetime not null ,
+                description         varchar(1000),
+constraint FK_milestone_user_userId foreign key (userId) references User (userId) ON DELETE CASCADE ,
+constraint FK_milestone_project_projectId foreign key (projectId) references project (projectId) ON DELETE CASCADE  );
+
+
+create table if not exists invitation(
+		invitationId        bigint primary key auto_increment,
+		projectId           int not null ,
+                description         varchar(1000), 
+                destination         varchar(30) not null,  
+                date_of_invitation  datetime not null ,
+constraint FK_invitation_project_projectId foreign key (projectId) references project (projectId) ON DELETE CASCADE 
+              
+);
+create table if not exists user_project(
+		projectId           int not null,
+		userId              bigint not null,
+constraint FK_project_user_userId_1 foreign key (userId) references User (userId) ON DELETE CASCADE ,
+constraint FK_project_user_projectId_1 foreign key (projectId) references project (projectId) ON DELETE CASCADE               
+);
+
+create table if not exists user_company(
+		companyId           int not null,
+		userId              bigint not null,
+                isowner             boolean ,
+                fromdate            date , 
+                untildate           date , 
+                position            varchar(25),
+constraint FK_company_user_userId_2 foreign key (userId) references User (userId) ON DELETE CASCADE ,
+constraint FK_company_user_companyId foreign key (companyId) references company (companyId) ON DELETE CASCADE               
+);
+
+create table if not exists user_invitation(
+		invitationId         bigint not null,
+		userId               bigint not null,
+                isowner              boolean , 
+                isseen               boolean ,
+                isaccept             boolean ,
+                read_time            datetime,
+constraint FK_invitation_user_invitationId foreign key (invitationId) references  invitation (invitationId) ON DELETE CASCADE ,
+constraint FK_invitationId_user_userId foreign key (userId) references User (userId) ON DELETE CASCADE                
+);
+
+create table if not exists note(
+                noteId               int primary key auto_increment,
+                userId               bigint not null,
+                title                varchar(30) not null, 
+                text                 varchar(1000) ,
+                date_time            datetime ,
+constraint FK_note_userId foreign key (userId) references  User (userId) ON DELETE CASCADE 
+);
+
+
+create table if not exists task(
+		taskId              int primary key auto_increment,
+		projectId           int not null , 
+                title               varchar(30) not null, 
+                description         varchar(1000), 
+                date_of_begin            date ,
+                date_of_end               date , 
+                extra_date                 date ,
+                subtaskId                  int not null UNIQUE , 
+constraint FK_task_projectId foreign key (projectId) references  project (projectId) ON DELETE CASCADE ,
+constraint FK_task_subtaskId foreign key (subtaskId) references  task (subtaskId) ON DELETE CASCADE
+
+);
+
+create table if not exists comment(
+		commentId            bigint primary key auto_increment,
+		userId               bigint not null,
+                title               varchar(30) not null, 
+                text               varchar(1000) ,
+                date_time            datetime ,
+                taskId               int not null , 
+constraint FK_comment_userId foreign key (userId) references  User (userId) ON DELETE CASCADE ,
+constraint FK_comment_taskId foreign key (taskId) references  task (taskId) ON DELETE CASCADE
+);
+create table if not exists task_user(
+		taskId              int primary key auto_increment,
+		userId               bigint not null,
+                isowner             boolean , 
+constraint FK_task_user_taskId foreign key (taskId) references  task (taskId) ON DELETE CASCADE ,
+constraint FK_task_user_userId foreign key (userId) references  User (userId) ON DELETE CASCADE
+
+);
+create table if not exists task_milestone(
+		taskId              int primary key auto_increment,
+		milestoneId         bigint not null, 
+constraint FK_task_milestone_taskId foreign key (taskId) references  task (taskId) ON DELETE CASCADE ,
+constraint FK_task_milestoner_milestoneId foreign key (milestoneId) references  milestone (milestoneId) ON DELETE CASCADE
+
+);
+
+create table if not exists task_user_status(
+		taskId               int primary key auto_increment,
+		userId               bigint not null,
+                statusId             tinyint not null , 
+constraint FK_task_user_status_taskId foreign key (taskId) references  task (taskId) ON DELETE CASCADE ,
+constraint FK_task_user_status_userId foreign key (userId) references  User (userId) ON DELETE CASCADE , 
+constraint FK_task_user_status_statusId foreign key (statusId) references  status (statusId) ON DELETE CASCADE
+);
+
+create table if not exists history_of_project_status(
+		fromdate             date not null,
+		projectId            int not null,
+                statusId             tinyint not null , 
+                untildate            date , 
+primary key(fromdate ,projectId , statusId ),
+constraint FK_history_project_status_projectId foreign key (projectId) references project (projectId) ON DELETE CASCADE , 
+constraint FK_history_project_status_statusId foreign key (statusId) references  status (statusId) ON DELETE CASCADE
+);
+
+
+
+
+
+
+
+
